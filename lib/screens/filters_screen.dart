@@ -1,35 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:meal_app/screens/tabs_screen.dart';
-import 'package:meal_app/widgets/main_drawer.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meal_app/providers/filters_provider.dart';
 
-class FiltersScreen extends StatefulWidget {
+class FiltersScreen extends ConsumerWidget {
   const FiltersScreen({super.key});
 
   @override
-  State<FiltersScreen> createState() => _FiltersScreenState();
-}
-
-class _FiltersScreenState extends State<FiltersScreen> {
-  bool _glutenFreeFilter = false;
-  bool _veganFilter = false;
-  bool _vegetarianFilter = false;
-  bool _lactoseFreeFilter = false;
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final activeFilters = ref.watch(filtersProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Your Filters'),
-      ),
-      drawer: MainDrawer(
-        onSelectScreen: (route) {
-          Navigator.of(context).pop();
-          if (route == 'meals') {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (ctx) => const TabsScreen()),
-            );
-          }
-        },
       ),
       body: Column(
         children: [
@@ -37,44 +18,44 @@ class _FiltersScreenState extends State<FiltersScreen> {
             context,
             "Gluten-Free",
             "Only includes gluten-free meals",
-            _glutenFreeFilter,
+            activeFilters[Filter.glutenFree]!,
             (bool newValue) {
-              setState(() {
-                _glutenFreeFilter = newValue;
-              });
+              ref
+                  .read(filtersProvider.notifier)
+                  .setFilter(Filter.glutenFree, newValue);
             },
           ),
           customSwitch(
             context,
             "Vegan",
             "Only includes vegan meals",
-            _veganFilter,
+            activeFilters[Filter.vegan]!,
             (bool newValue) {
-              setState(() {
-                _veganFilter = newValue;
-              });
+              ref
+                  .read(filtersProvider.notifier)
+                  .setFilter(Filter.vegan, newValue);
             },
           ),
           customSwitch(
             context,
             "Vegetarian",
             "Only includes vegetarian meals",
-            _vegetarianFilter,
+            activeFilters[Filter.vegeterian]!,
             (bool newValue) {
-              setState(() {
-                _vegetarianFilter = newValue;
-              });
+              ref
+                  .read(filtersProvider.notifier)
+                  .setFilter(Filter.vegeterian, newValue);
             },
           ),
           customSwitch(
             context,
             "Lactose",
             "Only includes Lactose meals",
-            _lactoseFreeFilter,
+            activeFilters[Filter.lactosFree]!,
             (bool newValue) {
-              setState(() {
-                _lactoseFreeFilter = newValue;
-              });
+              ref
+                  .read(filtersProvider.notifier)
+                  .setFilter(Filter.lactosFree, newValue);
             },
           ),
         ],

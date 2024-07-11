@@ -1,69 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:meal_app/providers/favourites_provider.dart';
+import 'package:meal_app/providers/filters_provider.dart';
+import 'package:meal_app/providers/nav_bar_provider.dart';
 import 'package:meal_app/screens/categories_screens.dart';
 import 'package:meal_app/screens/filters_screen.dart';
-import 'package:meal_app/screens/meals_screen.dart';
+import 'meals_screen.dart';
 import 'package:meal_app/widgets/main_drawer.dart';
 import '../models/meal.dart';
 
-class TabsScreen extends StatefulWidget {
+class TabsScreen extends ConsumerWidget {
   const TabsScreen({super.key});
 
   @override
-  State<TabsScreen> createState() => _TabsScreenState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final List<Meal> availableMeals = ref.watch(filteredMealsProvider);
 
-class _TabsScreenState extends State<TabsScreen> {
-  var selectedPageIndex = 0;
-  final List<Meal> _favouriteMeals = [];
-
-  void _showInfoMessage(String message) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-      ),
-    );
-  }
-
-  void _toggleMealFavouriteStatus(Meal meal) {
-    final isExisting = _favouriteMeals.contains(meal);
-
-    if (isExisting) {
-      setState(() {
-        _favouriteMeals.remove(meal);
-      });
-      _showInfoMessage('Meal is no longer a favourite');
-    } else {
-      setState(() {
-        _favouriteMeals.add(meal);
-      });
-      _showInfoMessage('Marked as a favourite');
-    }
-  }
-
-  void _onSelectScreen(String route) {
-    Navigator.of(context).pop();
-    if (route == "filters") {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (ctx) => const FiltersScreen(),
-        ),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
     Widget activePage = CategoriesScreen(
-      onToggleFavourite: _toggleMealFavouriteStatus,
+      avilableMeals: availableMeals,
     );
     var activeTitle = 'Pick your category';
 
+    final selectedPageIndex = ref.watch(navBarProvider);
+
     if (selectedPageIndex == 1) {
+      final List<Meal> favouriteMeals = ref.watch(favouriteMealsProvider);
       activePage = MealsScreen(
-        meals: _favouriteMeals,
-        onToggleFavourite: _toggleMealFavouriteStatus,
+        meals: favouriteMeals,
       );
       activeTitle = "Favourites";
     }
@@ -73,15 +36,21 @@ class _TabsScreenState extends State<TabsScreen> {
         title: Text(activeTitle),
       ),
       drawer: MainDrawer(
-        onSelectScreen: _onSelectScreen,
+        onSelectScreen: (String route) {
+          Navigator.of(context).pop();
+          if (route == "filters") {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (ctx) => const FiltersScreen(),
+              ),
+            );
+          }
+        },
       ),
       body: activePage,
       bottomNavigationBar: BottomNavigationBar(
-        onTap: (value) {
-          setState(() {
-            selectedPageIndex = value;
-          });
-        },
+        onTap: ref.read(navBarProvider.notifier).selectPage,
         currentIndex: selectedPageIndex,
         items: const [
           BottomNavigationBarItem(

@@ -1,22 +1,24 @@
 import 'package:flutter/material.dart';
-import 'package:meal_app/data/dummy_data.dart';
-import 'package:meal_app/models/category.dart';
+import '../models/category.dart';
 import 'package:meal_app/models/meal.dart';
 import 'package:meal_app/screens/meals_screen.dart';
 
 class CategoryGridItem extends StatelessWidget {
-  const CategoryGridItem(
-      {super.key, required this.category, required this.onToggleFavourite});
+  const CategoryGridItem({
+    super.key,
+    required this.category,
+    required this.avilableMeals,
+  });
 
   final Category category;
-  final void Function(Meal meal) onToggleFavourite;
+  final List<Meal> avilableMeals;
 
   @override
   Widget build(BuildContext context) {
     return InkWell(
       //alternative for geature detector
       onTap: () {
-        final List<Meal> filteredMeal = dummyMeals
+        final List<Meal> filteredMeal = avilableMeals
             .where(
               (meal) => meal.categories.contains(category.id),
             )
@@ -26,7 +28,6 @@ class CategoryGridItem extends StatelessWidget {
             builder: ((context) => MealsScreen(
                   title: category.title,
                   meals: filteredMeal,
-                  onToggleFavourite: onToggleFavourite,
                 )),
           ),
         );
